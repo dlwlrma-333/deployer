@@ -21,6 +21,11 @@ cp .env.template .env
 # 然后根据需要编辑 .env 文件，如果只是简单本地测试可以不用修改
 ```
 
+如果依赖服务连接的是固定库名（例如 `webdav`），需要在首次启动前完成其中一种配置：
+
+- 把 `.env` 里的 `POSTGRES_DB` 改成 `webdav`
+- 或在 `init.db/*.sql` 里显式执行 `CREATE DATABASE webdav;`
+
 ## 启动容器
 
 ```shell
@@ -30,6 +35,28 @@ docker compose up -d
 # 如果需要重启
 docker compose down -v && docker compose up -d
 
+```
+
+## 常见问题
+
+### 报错 `pq: database "webdav" does not exist`
+
+这通常表示容器已启动，但业务库尚未创建。最常见原因是：`/var/lib/postgresql/data` 已有旧数据，导致 `init.db` 脚本没有再次执行。
+
+```shell
+# 查看现有数据库
+docker compose exec postgres psql -U postgres -d postgres -c "\l"
+
+# 手动创建业务库（一次即可）
+docker compose exec postgres psql -U postgres -d postgres -c "CREATE DATABASE webdav;"
+```
+
+如果你希望重新执行初始化脚本，请清理数据卷后重建：
+
+```shell
+docker compose down -v
+rm -rf data
+docker compose up -d
 ```
 
 # 连接数据库
@@ -105,5 +132,4 @@ docker compose exec -T postgres psql -U postgres myapp < backup.sql
 # 备份所有数据库
 docker compose exec -T postgres pg_dumpall -U postgres > backup_all.sql
 ```
-
 
