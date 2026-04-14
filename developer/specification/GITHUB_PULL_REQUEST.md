@@ -8,6 +8,75 @@
 
 本规范适用于开发者从个人 Fork 仓库向社区仓库提交代码变更的场景，默认目标分支为社区仓库的 `main`。
 
+## 脚本前置配置
+
+如果计划使用仓库中的 `./scripts/merge.sh` 创建 Pull Request，先确认以下配置已经完成。
+
+### Git 与 GitHub 基础配置
+
+先配置本地 Git 账户，并确认当前机器已经能访问 GitHub：
+
+```bash
+git config --global user.name "<your-github-name>"
+git config --global user.email "<your-email>"
+
+ssh -T git@github.com
+```
+
+如果 `ssh -T git@github.com` 无法正常识别当前 GitHub 账号，需要先配置 SSH 公钥。可参考 [README.md](/root/code/deployer/developer/git/README.md)。
+
+### 远程仓库配置
+
+脚本依赖以下远程仓库约定：
+
+- `origin` 指向个人 Fork 仓库
+- `upstream` 指向社区主仓库
+
+检查命令：
+
+```bash
+git remote -v
+```
+
+示例：
+
+```bash
+git remote add upstream git@github.com:yeying-community/<project>.git
+git remote set-url origin git@github.com:<your-account>/<project>.git
+```
+
+`merge.sh` 会从 `origin` 的 GitHub URL 中解析个人账号名，并自动生成 `gh pr create --head <your-account>:<branch>`。因此 `origin` 必须是 GitHub 仓库地址。
+
+### GitHub CLI 配置
+
+脚本依赖 `gh` 创建 Pull Request。如果系统中未安装 `gh`，脚本会尝试自动安装；但更稳妥的方式是提前手工安装并完成登录：
+
+```bash
+gh auth login -h github.com -s repo
+gh auth status -h github.com
+```
+
+如果设置了 `GH_TOKEN`，脚本默认优先使用 `gh auth login` 的本地登录态，并忽略 `GH_TOKEN`。如果你希望走 token 方式，需要确保该 token 对目标仓库至少具有以下权限：
+
+- Repository 访问权限
+- Pull requests: Read and write
+
+### 脚本执行方式
+
+建议在仓库根目录执行脚本：
+
+```bash
+./scripts/sync.sh
+./scripts/merge.sh
+```
+
+执行前还应满足以下条件：
+
+- 当前目录是 Git 仓库根目录或其子目录
+- 当前分支不是游离 `HEAD`
+- 工作区没有未提交改动
+- 当前分支已经推送到个人 Fork，或允许脚本自动推送
+
 ## 提交前检查
 
 发起 Pull Request 前，至少完成以下检查：
