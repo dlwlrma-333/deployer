@@ -3,11 +3,11 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 固定配置（按当前发布流程约定）
-REPO_BASE="/home/zb/yeying-community"
+REPO_BASE="/root/code"
 MODULES_CONF="$script_dir/modules.conf"
 TAG_GLOB="v[0-9]*.[0-9]*.[0-9]*"
 CODEX_BIN="${RELEASE_NOTES_CODEX_BIN:-codex}"
-ARCHIVE_DIR="/tmp/packages"
+ARCHIVE_DIR="/opt/packages"
 KEEP_RAW_INPUT="false"
 DEFAULT_REMOTE="origin"
 
